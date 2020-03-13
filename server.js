@@ -40,7 +40,7 @@ app.post('/api/email', (req, res, next) => {
         cc:'donaldvu18@gmail.com',
         from: req.body.email,
         subject: 'Website Contact',
-        html: '<div>Testing: '+req.body.billing_address.toString()+'<br/>NextLine <p><strong>bold test</strong></p> <p style=\'background-color:yellow;\'>highlight'+req.body.billing_city+'</p></div>'
+        html: '<div>Sup: '+req.body.billing_address.toString()+'<br/>NextLine <p><strong>bold test</strong></p> <p style=\'background-color:yellow;\'>highlight'+req.body.billing_city+'</p></div>'
     }
  
     sendGrid.send(msg)
