@@ -32,17 +32,75 @@ app.get('/express_backend', (req,res)=> {
 
 app.post('/api/email', (req, res, next) => {
 
-    console.log(req.body);
-
-    sendGrid.setApiKey('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');
-    const msg = {
-        to: 'donaldvu18@yahoo.com',
-        cc:'donaldvu18@gmail.com',
-        from: req.body.email,
-        subject: 'Website Contact',
-        html: '<div>Sup: '+req.body.billing_address.toString()+'<br/>NextLine <p><strong>bold test</strong></p> <p style=\'background-color:yellow;\'>highlight'+req.body.billing_city+'</p></div>'
-    }
  
+
+    sendGrid.setApiKey("test");
+    const {clientAccount,rep,delivery_method,clientName,clientCompany,clientEmail,event,eventdate,price_ga,price_sro,rowSeat,cardNumber,billing_address,billing_city,billing_zipcode,billing_state,expiry,ra,comments,discount,discount_comment,subtotal}=req.body
+
+    htm='<div> <strong>ACCOUNT: ' + clientAccount.toString() + '</strong> <br/>'+
+    '<strong>REP: </strong>' + rep + ' <br/>' + 
+    '<strong>ORDER #: </strong> TBD' + 'br/>' + 
+    '<strong>DELIVERY METHOD: </strong>' + delivery_method + '<br/>' + 
+    '<br/>' + 
+    '<strong>CLIENT NAME/COMPANY: ' + clientName + clientCompany!==''?'/':null + clientCompany + '</strong> <br/>' + 
+    '<strong>EMAIL ADDRESS: <a href=\'mailto:' + clientEmail + '\'>' + clientEmail + '</a> </strong> <br/>' +
+    // rowSeat.map(suite=> {return(
+    //     '<span style=\'background-color:yellow;\'><strong>EVENT: </strong>' + event + '</span> <br/>' + 
+    // '<strong>DATE: </strong>' + eventdate + '<br/>' +
+    // '<strong>LOCATION: </strong>' + suite.name + '<br/>' + 
+    // '<strong>ROW/SEAT: </strong>GA1-' + suite.GA + suite.SRO>0 ? ' SRO1-' + suite.SRO :null + '<br/>' +
+    // '<strong>CHARGE BREAKDOWN: </strong>' + '$'+price_ga +'/GA ' + suite.SRO>0 ? '$' + price_sro + '/SRO' :null + '<br/><br/>'
+    //  )}) +
+     '<br/>' + 
+     '<strong>TOTAL CHARGE: </strong></div>'
+     console.log(htm)
+    comp=clientCompany!==''?'/':null 
+    suitelist=rowSeat.map(suite=> {return(
+        '<span style=\'background-color:yellow;\'><strong>EVENT: </strong>' + event.slice(0,-8) + '</span> <br/>' + 
+    '<strong>DATE: </strong>' + eventdate + '<br/>' +
+    '<strong>LOCATION: </strong>' + suite.name + '<br/>' + 
+    '<strong>ROW/SEAT: </strong>GA1-' + suite.GA + (parseInt(suite.SRO)>0 ? ' SRO1-' + suite.SRO :"" )+ '<br/>' +
+    '<strong>CHARGE BREAKDOWN: </strong>' + '$'+price_ga +'/GA ' + (parseInt(suite.SRO)>0 ? '$' + price_sro + '/SRO' :'') + '<br/><br/>'
+     )})
+     suitelist=suitelist.join('')
+     disc=discount>0 ? '$'+discount.toString() : 'N/A'
+
+     disc_com=discount_comment!==null ? discount_comment : 'N/A'
+    const msg = {
+        to: 'dvu@clippers.com',
+        cc:'donaldvu18@gmail.com',
+        from: 'no-reply@clippers.com',
+        subject: event.slice(0,8) + ' - Order # tbd - ' + clientName + comp + clientCompany,
+        html: '<div> <strong>ACCOUNT: ' + clientAccount.toString() + '</strong> <br/>'+
+        '<strong>REP: </strong>' + rep + ' <br/>' + 
+        '<strong>ORDER #: </strong> TBD' + '<br/>' + 
+        '<strong>DELIVERY METHOD: </strong>' + delivery_method + '<br/>' + 
+        '<br/>' + 
+        '<strong>CLIENT NAME/COMPANY: ' + clientName + comp + clientCompany + '</strong> <br/>' + 
+        '<strong>EMAIL ADDRESS: <a href=\'mailto:' + clientEmail + '\'>' + clientEmail + '</a> </strong> <br/>' +
+        suitelist + 
+        '<strong>DISCOUNT: </strong>$' + disc + '<br/>' +
+        '<strong>DISCOUNT Comments: </strong>' + disc_com + '<br/>' +
+         '<strong>TOTAL CHARGE: </strong> ' + subtotal+ '<br/><br/>' + 
+         '<strong>PAYMENT METHOD: </strong> AMEX*' + cardNumber.toString().slice(-4,) + ' exp. ' + expiry.toString() + '<br/>' + 
+         '<strong>BILLING ADDRESS: </strong>' + billing_address + '.' + billing_city + ', ' + billing_state + ' ' + billing_zipcode + '<br/>' + 
+         '<strong>RA: </strong>' + ra + '<br/>' + 
+         '<strong>COMMENTS: </strong>' + comments +'</div>'
+        
+        // '<div>Round3: '+req.body.billing_address.toString()+'<br/>NextLine <p><strong>bold test</strong></p> <p style=\'background-color:yellow;\'>highlight'+req.body.billing_city+'</p></div>'
+    }
+
+  
+    // return(<option value={game}>{game}</option>)
+    // '<span style=\'background-color:yellow;\'><strong>EVENT: </strong>' + event + '</span> <br/>' + 
+    // '<strong>DATE: </strong>' + eventdate + '<br/>' +
+    // '<strong>LOCATION: </strong>' + suite.name + '<br/>' + 
+    // '<strong>ROW/SEAT: </strong>GA1-' + suite.GA + suite.SRO>0 ? ' SRO1-' + suite.SRO :null + '<br/>'
+    // '<strong>CHARGE BREAKDOWN: </strong>' + '$'+price_ga +'/GA ' + suite.SRO>0 ? '$' + price_sro + '/SRO' :null + '<br/>'
+
+
+
+
     sendGrid.send(msg)
         .then(result => {
 
