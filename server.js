@@ -7,7 +7,7 @@ const sendGrid = require('@sendGrid/mail');
 
 // app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
-app.use(cors());
+// app.use(cors());
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Change later to only allow our server
@@ -16,19 +16,75 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/api', (req, res, next) => {
-    res.send('API Status: I\'m awesome')
+// app.get('/api', (req, res, next) => {
+//     res.send('API Status: I\'m awesome')
+// });
+
+// app.get('/express_backend', (req,res)=> {
+//     const axs_customers=[
+//         {id:1,firstName:'Don'},
+//          {id:2,firstName:'Kalvin'}
+//     ];
+//     res.json(axs_customers)
+//     // res.send({express:'CONNECTED'})
+//     // res.sendFile(path.join(__dirname+'/index.html'));
+    
+// });
+
+// ********************************************* PATH FOR FINDING SALES REP NAME*********************************************
+app.get('/findRep',function(req,res){
+    const sql=require('mssql');
+    const config = {
+        user: 'dataedo',
+        password: 'c9OK*K8&t7So',
+        server: 'clippersbi.database.windows.net', 
+        database: 'TpanPersonalDB',
+    }
+  
+    sql.connect(config,function(err){
+        if (err) console.log(err);
+    
+        let sqlRequest= new sql.Request();
+    
+        let repletter=req.query.char;
+        let sqlQuery='Select rep_last_name,rep_first_name,rep_id from AXSTrans.suite_sales_rep where rep_last_name like \'%'+repletter+'%\' or rep_first_name like \'%'+repletter+'%\''
+      
+        sqlRequest.query(sqlQuery,function(err,data){
+            if (err) console.log(err)
+            res.json(data);
+            // setTimeout( sql.close(),10000)
+        });
+    });
 });
 
-app.get('/express_backend', (req,res)=> {
-    const axs_customers=[
-        {id:1,firstName:'Don'},
-         {id:2,firstName:'Kalvin'}
-    ];
-    res.json(axs_customers)
-    res.send({express:'CONNECTED'})
-    // res.sendFile(path.join(__dirname+'/index.html'));
+// **************************************************** PATH FOR FINDING CUSTOMER INFO **********************************************************
+app.get('/findClient',function(req,res){
+    const sql=require('mssql');
+    const config = {
+        user: 'dataedo',
+        password: 'c9OK*K8&t7So',
+        server: 'clippersbi.database.windows.net', 
+        database: 'TpanPersonalDB',
+    }
+  
+    sql.connect(config,function(err){
+        if (err) console.log(err);
+    
+        let sqlRequest= new sql.Request();
+    
+        let custlettter=req.query.char;
+        let sqlQuery='SELECT TOP (10) ISNULL(first_name,\'N/A\') as first_name,ISNULL(last_name,\'N/A\') as last_name, ISNULL(email,\'N/A\') as email,CAST(account_number as nvarchar) as account_number,ISNULL(company_name,\'N/A\') as company_name,CAST(ISNULL(phone1,\'N/A\') as nvarchar) as phone1 FROM [AXSTrans].[customers] where first_name like \'%'+custlettter+'%\' or last_name like \'%'+custlettter+'%\''
+      
+        sqlRequest.query(sqlQuery,function(err,data){
+            if (err) console.log(err)
+            res.json(data);
+            // setTimeout( sql.close(),10000)
+        });
+    });
 });
+
+
+// ***************************************************** PATH FOR SENDING EMAIL VIA SENGRID ***************************************************
 
 app.post('/api/email', (req, res, next) => {
 
@@ -53,7 +109,7 @@ app.post('/api/email', (req, res, next) => {
     //  )}) +
      '<br/>' + 
      '<strong>TOTAL CHARGE: </strong></div>'
-     console.log(htm)
+     
     comp=clientCompany!==''?'/':null 
     suitelist=rowSeat.map(suite=> {return(
         '<span style=\'background-color:yellow;\'><strong>EVENT: </strong>' + event.slice(0,-8) + '</span> <br/>' + 
@@ -66,6 +122,8 @@ app.post('/api/email', (req, res, next) => {
      disc=discount>0 ? '$'+discount.toString() : 'N/A'
 
      disc_com=discount_comment!==null ? discount_comment : 'N/A'
+
+
     const msg = {
         to: 'dvu@clippers.com',
         cc:'donaldvu18@gmail.com',
@@ -79,7 +137,7 @@ app.post('/api/email', (req, res, next) => {
         '<strong>CLIENT NAME/COMPANY: ' + clientName + comp + clientCompany + '</strong> <br/>' + 
         '<strong>EMAIL ADDRESS: <a href=\'mailto:' + clientEmail + '\'>' + clientEmail + '</a> </strong> <br/>' +
         suitelist + 
-        '<strong>DISCOUNT: </strong>$' + disc + '<br/>' +
+        '<strong>DISCOUNT: </strong>' + disc + '<br/>' +
         '<strong>DISCOUNT Comments: </strong>' + disc_com + '<br/>' +
          '<strong>TOTAL CHARGE: </strong> ' + subtotal+ '<br/><br/>' + 
          '<strong>PAYMENT METHOD: </strong> AMEX*' + cardNumber.toString().slice(-4,) + ' exp. ' + expiry.toString() + '<br/>' + 
