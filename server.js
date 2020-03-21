@@ -91,7 +91,7 @@ app.post('/api/email', (req, res, next) => {
  
 
     sendGrid.setApiKey("test");
-    const {clientAccount,rep,delivery_method,clientName,clientCompany,clientEmail,event,eventdate,price_ga,price_sro,rowSeat,cardNumber,billing_address,billing_city,billing_zipcode,billing_state,expiry,ra,comments,discount,discount_comment,subtotal}=req.body
+    const {clientAccount,rep,delivery_method,clientName,clientCompany,clientEmail,discountList,event,eventdate,price_ga,price_sro,rowSeat,cardNumber,billing_address,billing_city,billing_zipcode,billing_state,expiry,ra,comments,discount,discount_comment,total,subtotal}=req.body
 
     htm='<div> <strong>ACCOUNT: ' + clientAccount.toString() + '</strong> <br/>'+
     '<strong>REP: </strong>' + rep + ' <br/>' + 
@@ -122,7 +122,11 @@ app.post('/api/email', (req, res, next) => {
      disc=discount>0 ? '$'+discount.toString() : 'N/A'
 
      disc_com=discount_comment!==null ? discount_comment : 'N/A'
-
+    discountchunk=discountList.map(disc=>{return(
+        '<strong>DISCOUNT: </strong><span style=\'color:red;\'>-$' + disc.discount + '</span><br/>' +
+        '<strong>DISCOUNT COMMENTS: </strong>' + disc.comment + '<br/><br/>' 
+    )})
+    discountchunk=discountchunk.join('')
 
     const msg = {
         to: 'dvu@clippers.com',
@@ -133,13 +137,14 @@ app.post('/api/email', (req, res, next) => {
         '<strong>REP: </strong>' + rep + ' <br/>' + 
         '<strong>ORDER #: </strong> TBD' + '<br/>' + 
         '<strong>DELIVERY METHOD: </strong>' + delivery_method + '<br/>' + 
-        '<br/>' + 
-        '<strong>CLIENT NAME/COMPANY: ' + clientName + comp + clientCompany + '</strong> <br/>' + 
-        '<strong>EMAIL ADDRESS: <a href=\'mailto:' + clientEmail + '\'>' + clientEmail + '</a> </strong> <br/>' +
+        '<strong>CLIENT NAME/COMPANY:</strong> ' + clientName + comp + clientCompany + ' <br/>' + 
+        '<strong>EMAIL ADDRESS: <a href=\'mailto:' + clientEmail + '\'>' + clientEmail + '</a> </strong> <br/><br/>' +
         suitelist + 
-        '<strong>DISCOUNT: </strong>' + disc + '<br/>' +
-        '<strong>DISCOUNT Comments: </strong>' + disc_com + '<br/>' +
-         '<strong>TOTAL CHARGE: </strong> ' + subtotal+ '<br/><br/>' + 
+        '<strong>SUBTOTAL: </strong> $' + subtotal+ '<br/><br/>' + 
+        discountchunk+
+        // '<strong>DISCOUNT: </strong>' + disc + '<br/>' +
+        // '<strong>DISCOUNT Comments: </strong>' + disc_com + '<br/>' +
+         '<strong>TOTAL CHARGE: </strong> $' + total + '<br/><br/>' + 
          '<strong>PAYMENT METHOD: </strong> AMEX*' + cardNumber.toString().slice(-4,) + ' exp. ' + expiry.toString() + '<br/>' + 
          '<strong>BILLING ADDRESS: </strong>' + billing_address + '.' + billing_city + ', ' + billing_state + ' ' + billing_zipcode + '<br/>' + 
          '<strong>RA: </strong>' + ra + '<br/>' + 
