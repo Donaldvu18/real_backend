@@ -36,9 +36,9 @@ app.get('/findRep',function(req,res){
     const sql=require('mssql');
     const config = {
         user: 'dataedo',
-        password: 'c9OK*K8&t7So',
-        server: 'clippersbi.database.windows.net', 
-        database: 'TpanPersonalDB',
+        password: 'password',
+        server: 'server', 
+        database: 'db',
     }
   
     sql.connect(config,function(err){
@@ -62,9 +62,9 @@ app.get('/findClient',function(req,res){
     const sql=require('mssql');
     const config = {
         user: 'dataedo',
-        password: 'c9OK*K8&t7So',
-        server: 'clippersbi.database.windows.net', 
-        database: 'TpanPersonalDB',
+        password: 'password',
+        server: 'server', 
+        database: 'db',
     }
   
     sql.connect(config,function(err){
@@ -90,7 +90,7 @@ app.post('/api/email', (req, res, next) => {
 
  
 
-    sendGrid.setApiKey("test");
+    sendGrid.setApiKey("key");
     const {clientAccount,rep,delivery_method,clientName,clientCompany,clientEmail,discountList,event,eventdate,price_ga,price_sro,rowSeat,cardNumber,billing_address,billing_city,billing_zipcode,billing_state,expiry,ra,comments,discount,discount_comment,total,subtotal}=req.body
 
     htm='<div> <strong>ACCOUNT: ' + clientAccount.toString() + '</strong> <br/>'+
